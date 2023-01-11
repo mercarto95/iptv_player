@@ -6,5 +6,5 @@ Browse &amp; stream your IPTV channels, movies and series easily. Pick up any it
 <img title="Login menu, existing accounts " alt="Alt text" src="./img/login_exsiting_account.jpg" style="width:40%; heigh:50%;">
 
 #### Login menu, where user input new account. A new account will be created, stored to be rememberd next time user uses the app, and also request the data from the server to store it as a local cache copy.
-<img title="Computer vision for that image" alt="Alt text" src="./img/login_new_account.jpg">
+<img title="Computer vision for that image" alt="Alt text" src="./img/login_new_account.jpg" style="width:40%; heigh:50%;">
 
