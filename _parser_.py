@@ -1,33 +1,76 @@
 import os
+from channel import *
+from movie import*
+from series import *
 
-f = open("../data/test.bi", "rb")
+def read_tvFile_contents(file):
+    f = open(file, "rb")
 
-file = f.read()
-if len(file) == 0:
-    print("File is empty")
-    os._exit(100)
-f.close()
+    file = f.read()
+    if len(file) == 0:
+        print("File is empty")
+        os._exit(100)
+    f.close()
 
-pass
-
-
-# each line beginning with "#EXTINF:-1 "
-text = file.decode()
-lines = text.split("#EXTINF:-1 ")
-item = lines[2]
+    return file
 
 memory = []
-s = item.split('"')
-test = ""
-now = False
+lines = []
 
-for i in s:
-    if now == True:
-        test += i
-        now = False
-    if i == " group-title=":
-        test += i
-        now = True 
+countries = []
+tot = []
+recognized_group_title = False
+def parse_file_contents(file_content):
+    global memory, lines, countries, tot, recognized_group_title
+    # each line beginning with "#EXTINF:-1 "
+    text = file_content.decode()
+    lines = text.split("#EXTINF:-1 ")
+    item = lines[2]
+    s = item.split('"')
+    test = ""
+    now = False
+
+    for i in s:
+        if now == True:
+            test += i
+            now = False
+        if i == " group-title=":
+            test += i
+            now = True 
+    for line in lines:
+        buffer = ""
+        details = line.split('"')
+        for word in details:
+            if recognized_group_title:
+                tmp = word.split("|")
+                buffer = tmp[0]
+                #### operate on buffer 
+                if handle_country(buffer):
+                    #push_the_line(buffer, line)
+                    print(buffer)
+                    if buffer == '':
+                        buffer = word
+                    countries.append(buffer)
+                recognized_group_title = False 
+                x = check_type(details[-1])
+                if x == "channel":
+                    push_to_channel(buffer, line)
+                elif x == "movie":
+                    push_to_movie(buffer, line)
+                elif x == "series":
+                    push_to_series(buffer, line)
+                push_the_line(buffer, line)
+
+            if word == " group-title=":
+                #buffer += word
+                recognized_group_title = True
+
+
+
+
+
+
+
 
 def handle_country(param):
     if param in countries:
@@ -37,6 +80,7 @@ def handle_country(param):
 
 
 def push_the_line(country, info):
+    global memory
     for index in memory:
         if index[0] == country:
             index[1].append(info)
@@ -52,6 +96,7 @@ series_list = []
 
 
 def push_to_channel(country, info):
+    global channels_list
     for index in channels_list:
         if index[0] == country:
             index[1].append(info)
@@ -62,6 +107,7 @@ def push_to_channel(country, info):
     return True
 
 def push_to_series(country, info):
+    global series_list
     for index in series_list:
         if index[0] == country:
             index[1].append(info)
@@ -72,6 +118,7 @@ def push_to_series(country, info):
     return True
 
 def push_to_movie(country, info):
+    global movies_list
     for index in movies_list:
         if index[0] == country:
             index[1].append(info)
@@ -92,44 +139,40 @@ def check_type(link):
         return "channel"
     
 
-countries = []
-tot = []
-recognized_group_title = False
-for line in lines:
-    buffer = ""
-    details = line.split('"')
-    for word in details:
-        if recognized_group_title:
-            tmp = word.split("|")
-            buffer = tmp[0]
-            #### operate on buffer 
-            if handle_country(buffer):
-                #push_the_line(buffer, line)
-                print(buffer)
-                if buffer == '':
-                    buffer = word
-                countries.append(buffer)
-            recognized_group_title = False 
-            x = check_type(details[-1])
-            if x == "channel":
-                push_to_channel(buffer, line)
-            elif x == "movie":
-                push_to_movie(buffer, line)
-            elif x == "series":
-                push_to_series(buffer, line)
-            push_the_line(buffer, line)
-
-        if word == " group-title=":
-            #buffer += word
-            recognized_group_title = True
-
 
 
 
 
 pass
 
+def get_objects(myList, type):
+    if len(myList) == 0:
+        return None
+    objects = []
+    for i in myList:
+        tmp = [i[0], []]
+        for j in i[1]:
+            if type == 'channels':
+                object = Channel(j)
+            elif type == 'movies':
+                object = Movie(j)
+            elif type == 'series':
+                object = Series(j)
+            tmp[1].append(object)
+        objects.append(tmp)
+    return objects
 
 
 ## parse movies 
+
+
+
+def get_series():
+    return get_objects(series_list, 'series')
+
+def get_channels():
+    return get_objects(channels_list, 'channels')
+
+def get_movies():
+    return get_objects(movies_list, 'movies')
 
