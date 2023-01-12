@@ -204,10 +204,10 @@ background-color: rgb(244, 100, 71);
      </property>
      <property name="styleSheet">
       <string notr="true">background-color:rgb(0, 0, 57);
-</string>
+transition: 0.3s ease;</string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <widget class="QLabel" name="label">

@@ -1,6 +1,8 @@
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets 
+from PyQt5.QtGui import QMovie
+from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QApplication, QVBoxLayout
 from Account import *
 import modirator
 from PyQt5.QtWidgets import QMessageBox
@@ -8,10 +10,12 @@ import _parser_
 import Tv
 
 
+
+is_loading_now = False
 comBox_is_readed = False
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
+        self.main_window = MainWindow.setObjectName("MainWindow")
         MainWindow.resize(792, 780)
         MainWindow.setMinimumSize(QtCore.QSize(792, 597))
         MainWindow.setMaximumSize(QtCore.QSize(792, 597))
@@ -22,6 +26,7 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("border:0px;")
         MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         MainWindow.setAnimated(True)
+        
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.frame = QtWidgets.QFrame(self.centralwidget)
@@ -252,15 +257,78 @@ class Ui_MainWindow(object):
 "")
         self.btn_enter_existing.setObjectName("btn_enter_existing")
         self.widget_1.addWidget(self.page_2)
-        MainWindow.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
+        ################################################################33
+        self.label_gif = QtWidgets.QLabel(self.widget_1)
+        self.label_gif.setGeometry(QtCore.QRect(190, 120, 211, 181))
+        self.label_gif.setStyleSheet("background-color: rgb(53, 53, 53);")
+        self.label_gif.setScaledContents(True)
+        self.movie = QMovie("./img/loader.gif")
+        self.label_gif.setMovie(self.movie)
+        self.movie.start()
+
+        self.label_gif.setObjectName("label_gif")
+        self.label_gif.hide()
+
+
+        ##################
+        self.frame_2 = QtWidgets.QFrame(MainWindow)
+        self.frame_2.setGeometry(QtCore.QRect(180, 160, 481, 271))
+        self.frame_2.setStyleSheet("background-color: rgb(0, 0, 31);\n"
+"border: 1px solid rgb(255, 255, 127);")
+        self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_2.setObjectName("frame_2")
+        self.label_7 = QtWidgets.QLabel(self.frame_2)
+        self.label_7.setGeometry(QtCore.QRect(20, 20, 441, 101))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_7.setFont(font)
+        self.label_7.setStyleSheet("color:rgb(231, 255, 248)")
+        self.label_7.setTextFormat(QtCore.Qt.PlainText)
+        self.label_7.setObjectName("label_7")
+        self.btn_submit_exist = QtWidgets.QPushButton(self.frame_2)
+        self.btn_submit_exist.setGeometry(QtCore.QRect(170, 200, 151, 61))
+        self.btn_submit_exist.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.btn_enter_existing.setEnabled(True)
+        font = QtGui.QFont()
+        font.setFamily("MV Boli")
+        font.setPointSize(14)
+        self.btn_submit_exist.setFont(font)
+        self.btn_submit_exist.setStyleSheet("QPushButton{\n"
+"    color:rgb(255, 255, 127);\n"
+"}\n"
+"QPushButton:hover{\n"
+"background-color: rgb(255, 174, 44);\n"
+"color:rgb(255, 110, 37);"
+"}\n"
+"")
+        self.btn_submit_exist.setObjectName("btn_submit_exist")
+        self.label_waiting_icon = QtWidgets.QLabel(self.frame_2)
+        self.label_waiting_icon.setGeometry(QtCore.QRect(360, 130, 101, 81))
+        self.label_waiting_icon.setObjectName("label_waiting_icon")
+
+        self.label_waiting_icon.setStyleSheet("background-color: rgb(53, 53, 53);")
+        self.label_waiting_icon.setScaledContents(True)
+        self.movie = QMovie("./img/loader.gif")
+        self.label_waiting_icon.setMovie(self.movie)
+        self.movie.start()
+
+        #################
+        ######################################################################333
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.main_window = MainWindow
+        
+        self.retranslateUi(self.main_window)
         self.widget_1.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.btn_existing_account.clicked.connect(self.existing_account_clicked)
         self.btn_new_account.clicked.connect(self.new_account_menu_clicked)
-        self.btn_enter_new.clicked.connect(self.submit_new_account_clicked)
-        self.btn_enter_existing.clicked.connect(self.submit_existing_account_clicked)
+        self.btn_enter_new.clicked.connect(self.submit_new_account_clicked) #submit_new_account_clicked
+        self.btn_enter_existing.clicked.connect(self.show_waiting_menu)
+        self.btn_submit_exist.clicked.connect(self.submit_existing_account_clicked)
         self.account = None
     
     def existing_account_clicked(self):
@@ -280,6 +348,9 @@ class Ui_MainWindow(object):
                 x = line.split(", ")
                 self.comboBox_existing_account.addItem(x[0])
         comBox_is_readed = True
+
+        
+        pass
         
 
     def new_account_menu_clicked(self):
@@ -296,20 +367,21 @@ class Ui_MainWindow(object):
         username = self.txtBox_username.text()
         password = self.txtBox_password.text()
         server_link = self.txtBox_server.text()
+        if name == "" or username == "" or password == "":
+            self.show_msg("Fill all fields, please!")
+            return
+        
         account =  Account(name, username, password, server_link)
         if account == False:
             print("Can not create account instance. ")
             ##                                              ## display msg box error 
         #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
+        self.frame_2.hide()
+        pass
+
 
     def submit_existing_account_clicked(self):
         print("submit existing account ")
-        read_from_cache = self.radioButton_read_from_file.isChecked()
-        make_new_request = self.radioButton_update_file.isChecked()
-        if read_from_cache == make_new_request == False:
-            self.show_msg("Choose: read from cache OR update file, Please! ")
-            return
-        
         tv_name = self.comboBox_existing_account.currentText()
         x = self.account.confirm_existing_account(tv_name)
         if x == False:
@@ -318,10 +390,11 @@ class Ui_MainWindow(object):
         #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
         path = "../data/"   ######################################################## Make it dynamic
         tv_name = path +  tv_name + ".bi"
-        self.tv = Tv.Tv(tv_name)
-
-
         
+        self.tv = Tv.Tv(tv_name)
+        self.frame_2.hide()
+        pass
+
 
     def show_msg(self, msg):
         box = QMessageBox()
@@ -332,6 +405,17 @@ class Ui_MainWindow(object):
         x = box.exec_()
 
 
+    def show_waiting_menu(self):
+        read_from_cache = self.radioButton_read_from_file.isChecked()
+        make_new_request = self.radioButton_update_file.isChecked()
+        if read_from_cache == make_new_request == False:
+            self.show_msg("Choose: read from cache OR update file, Please! ")
+            return
+        self.btn_new_account.setEnabled(False)
+        self.btn_existing_account.setEnabled(False)
+        self.btn_enter_existing.setEnabled(False)
+        print("Going to waiting_frame now now")
+        self.frame_2.show()
         
 
 
@@ -347,6 +431,10 @@ class Ui_MainWindow(object):
         self.label_4.setText(_translate("MainWindow", "Password"))
         self.label_5.setText(_translate("MainWindow", "Server link"))
         self.btn_enter_new.setText(_translate("MainWindow", "Enter"))
+        self.label_7.setText(_translate("MainWindow", "Its going to take some time to prepare \n"
+"things... plz press \"Go Ahead\" to start.."))
+        self.frame_2.hide()
+        self.btn_submit_exist.setText(_translate("MainWindow", "Go Ahead"))
         self.label_6.setText(_translate("MainWindow", "Account"))
         self.groupBox.setTitle(_translate("MainWindow", "Activity"))
         self.radioButton_read_from_file.setText(_translate("MainWindow", "Read from cache (Fast)"))

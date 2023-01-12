@@ -41,4 +41,4 @@ class Series:
             print("channel, except (2)")
         return link
 
-series = Series(x)
+'series = Series(x)'
