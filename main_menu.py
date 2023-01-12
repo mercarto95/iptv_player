@@ -1,12 +1,15 @@
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 import _parser_
-
+import vlc
+import os 
 
 channel_categories_listed = False 
 series_categories_listed = False 
 movies_categories_listed = False 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        self.player = vlc.MediaPlayer()
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(890, 691)
         MainWindow.setMinimumSize(QtCore.QSize(890, 691))
@@ -389,6 +392,56 @@ class Ui_MainWindow(object):
 "}\n"
 "")
         self.bth_subtitle_submit.setObjectName("bth_subtitle_submit")
+
+
+        #####
+
+        self.btn_close = QtWidgets.QPushButton(self.groupBox)
+        self.btn_close.setGeometry(QtCore.QRect(20, 240, 51, 51))
+        self.btn_close.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.btn_close.setAutoFillBackground(False)
+        self.btn_close.setStyleSheet("QPushButton{\n"
+"    color: black;\n"
+"    background-color: rgb(244, 100, 71);\n"
+"    border-radius:10px;\n"
+"}\n"
+"\n"
+"QPushButton:hover{\n"
+"    background-color: rgb(253, 255, 88);\n"
+"    color: rgb(0, 0, 255);\n"
+"}\n"
+"")
+        self.btn_close.setText("")
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("./img/close.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_close.setIcon(icon4)
+        self.btn_close.setIconSize(QtCore.QSize(45, 49))
+        self.btn_close.setObjectName("btn_close")
+        self.btn_resize = QtWidgets.QPushButton(self.groupBox)
+        self.btn_resize.setGeometry(QtCore.QRect(100, 240, 51, 51))
+        self.btn_resize.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.btn_resize.setAutoFillBackground(False)
+        self.btn_resize.setStyleSheet("QPushButton{\n"
+"    color: black;\n"
+"    background-color: rgb(244, 100, 71);\n"
+"    border-radius:10px;\n"
+"}\n"
+"\n"
+"QPushButton:hover{\n"
+"    background-color: rgb(253, 255, 88);\n"
+"    color: rgb(0, 0, 255);\n"
+"}\n"
+"")
+        self.btn_resize.setText("")
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap("./img/resize.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_resize.setIcon(icon5)
+        self.btn_resize.setIconSize(QtCore.QSize(45, 49))
+        self.btn_resize.setObjectName("btn_resize")
+
+        ####
+
+
         self.comboBox = QtWidgets.QComboBox(self.groupBox_2)
         self.comboBox.setGeometry(QtCore.QRect(10, 30, 101, 21))
         self.comboBox.setObjectName("comboBox")
@@ -431,12 +484,102 @@ class Ui_MainWindow(object):
         self.show_movies_category()
         self.show_channels_category()
 
+        ### Channels, series, movies functionality
         self.btn_select_channel_category.clicked.connect(self.load_channels)
         self.btn_select_movies_category.clicked.connect(self.load_movies)
         self.btn_select_series_category.clicked.connect(self.load_series)
+        self.btn_stream.clicked.connect(self.stream)
+        
+
+
+        ## Video controll
+        self.btn_stop.clicked.connect(self.stop_playing)
+        self.btn_play.clicked.connect(self.resume)
+        self.btn_resize.clicked.connect(self.full_screen_flipflop)
+        self.btn_close.clicked.connect(self.kill_stream)
+        self.volume_control.valueChanged[int].connect(self.change_volume)
+
+        ## get avilavble subtitles 
+        self.subtitles = self.get_subtitles()
+        ## get avilable audio tracks 
+        self.audio_tracks = self.get_audio_tracks()
+
+    def get_subtitles(self):
+        avilable_subtitles = self.player.video_get_spu_description()
+        # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        return avilable_subtitles
+
+    def get_audio_tracks(self):
+        avilable_tracks = self.player.audio_get_track_description()
+        return avilable_tracks
+
+
+    def change_volume(self, value):
+        print(f"Value is {value}")
+        self.player.audio_set_volume(value)
+        
+    def kill_stream(self):
+        self.player.stop()
+    
+    def full_screen_flipflop(self):
+        if self.player.get_fullscreen():
+            self.player.video_set_scale(0.5)
+            self.player.set_fullscreen(False)
+            return 
+        self.player.video_set_scale(1)
+        self.player.set_fullscreen(True)
+
+    def stop_playing(self):
+        self.player.pause()
+
+    def resume(self):
+        self.player.play()
+
+    def stream(self):
+        # need to get the url first.
+        selected = self.listWidget_2.currentItem().text()
+        stream_url = self.get_url(selected)
+        if stream_url != None:
+            self.stream_now(stream_url)
+            return
+        ########################################### Show msg to say link can not found 
+        print("Error, can not parse the selected item and no link found")
+    
+    def stream_now(self, url):
+        self.player.set_media(vlc.Media(url))
+        self.player.video_set_scale(0.5)
+        self.player.play()
+        state = self.player.get_state()
+        if state == vlc.State.Ended or state == vlc.State.Error:
+            ###################################### Show msg to say channel has no signal now 
+            print("No signal for this selected item")
+            return False 
+        return True
+    
+    def get_url(self, selected_item):
+        category = self.cached_category
+        myList = None
+        if self.cached_type == "movie":
+            myList = self.movies_categories
+        elif self.cached_type == "series":
+            myList = self.series_categories
+        elif self.cached_type == "channel":
+                myList = self.channels_categories
+        if category == None or myList == None:
+            return 
+        
+        for i in myList:
+            if i[0] == category:
+                for j in i[1]:
+                    if j.name == selected_item:
+                        print(f"Found, {j.name} , {j.link}")
+                        return j.link
+        return None
 
     def load_channels(self):
         category = self.listWidget_channels.currentItem().text()
+        self.cached_category = category
+        self.cached_type = "channel"
         self.listWidget_2.clear()
         for i in self.channels_categories:
             if i[0] == category:
@@ -445,6 +588,8 @@ class Ui_MainWindow(object):
 
     def load_movies(self):
         category = self.listWidget_movies.currentItem().text()
+        self.cached_category = category
+        self.cached_type = "movie"
         self.listWidget_2.clear()
         for i in self.movies_categories:
             if i[0] == category:
@@ -453,6 +598,8 @@ class Ui_MainWindow(object):
 
     def load_series(self):
         category = self.listWidget_series.currentItem().text()
+        self.cached_category = category
+        self.cached_type = "series"
         self.listWidget_2.clear()
         for i in self.series_categories:
             if i[0] == category:
