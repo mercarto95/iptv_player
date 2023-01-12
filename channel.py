@@ -2,7 +2,7 @@
 class Channel:
     def __init__(self, line):
         self.channel_id = self.parse_id(line)
-        self.channel_name = self.parse_name(line)
+        self.name = self.parse_name(line)
         self.logo = self.parse_logo(line)
         self.group = self.parse_group(line)
         self.link = self.parse_link(line)

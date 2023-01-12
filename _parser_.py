@@ -3,7 +3,10 @@ from channel import *
 from movie import*
 from series import *
 
+tv_name = ""
 def read_tvFile_contents(file):
+    global tv_name
+    tv_name = file
     f = open(file, "rb")
 
     file = f.read()
@@ -166,13 +169,28 @@ def get_objects(myList, type):
 ## parse movies 
 
 
+series_cache_list = []
+movies_cache_list = []
+channels_cache_list = []
 
 def get_series():
-    return get_objects(series_list, 'series')
+    global series_cache_list
+    if len( series_cache_list ) > 0:
+        return series_cache_list
+    series_cache_list = get_objects(series_list, 'series')
+    return series_cache_list
 
 def get_channels():
-    return get_objects(channels_list, 'channels')
+    global channels_cache_list
+    if len( channels_cache_list ) > 0:
+        return series_cache_list
+    channels_cache_list = get_objects(channels_list, 'channels')
+    return channels_cache_list
 
 def get_movies():
-    return get_objects(movies_list, 'movies')
+    global movies_cache_list
+    if len( movies_cache_list ) > 0:
+        return movies_cache_list
+    movies_cache_list = get_objects(movies_list, 'movies')
+    return movies_cache_list
 
