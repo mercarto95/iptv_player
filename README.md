@@ -8,3 +8,7 @@ Browse &amp; stream your IPTV channels, movies and series easily. Pick up any it
 #### Login menu, where user input new account. A new account will be created, stored to be rememberd next time user uses the app, and also request the data from the server to store it as a local cache copy.
 <img title="Computer vision for that image" alt="Alt text" src="./img/login_new_account.jpg" style="width:40%; heigh:50%;">
 
+
+#### When the user login, and everything goes successfully, the user get this frame. The user have ability to choose live channels, movies or series to stream. A video control is also provided where user can control, choose audio-track or subtitles
+<img title="Computer vision for that image" alt="Alt text" src="./img/main_menu1.jpg" style="width:90%; heigh:90%;">
+
