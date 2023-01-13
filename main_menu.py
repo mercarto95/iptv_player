@@ -252,10 +252,10 @@ class Ui_MainWindow(object):
         self.groupBox_4.setGeometry(QtCore.QRect(10, 630, 871, 41))
         self.groupBox_4.setStyleSheet("color: rgb(253, 255, 88);")
         self.groupBox_4.setObjectName("groupBox_4")
-        self.horizontalSlider = QtWidgets.QSlider(self.groupBox_4)
-        self.horizontalSlider.setGeometry(QtCore.QRect(10, 20, 850, 5))
-        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider.setObjectName("horizontalSlider")
+        self.time_Slider = QtWidgets.QSlider(self.groupBox_4)
+        self.time_Slider.setGeometry(QtCore.QRect(10, 20, 850, 5))
+        self.time_Slider.setOrientation(QtCore.Qt.Horizontal)
+        self.time_Slider.setObjectName("time_Slider")
         self.label_4 = QtWidgets.QLabel(self.frame)
         self.label_4.setGeometry(QtCore.QRect(370, 670, 221, 20))
         self.label_4.setStyleSheet("color: rgb(232, 255, 78);")
@@ -374,7 +374,7 @@ class Ui_MainWindow(object):
         self.btn_next.setIconSize(QtCore.QSize(45, 49))
         self.btn_next.setObjectName("btn_next")
         self.groupBox_2 = QtWidgets.QGroupBox(self.groupBox)
-        self.groupBox_2.setGeometry(QtCore.QRect(10, 500, 121, 111))
+        self.groupBox_2.setGeometry(QtCore.QRect(10, 500, 155, 111))
         self.groupBox_2.setObjectName("groupBox_2")
         self.bth_subtitle_submit = QtWidgets.QPushButton(self.groupBox_2)
         self.bth_subtitle_submit.setGeometry(QtCore.QRect(10, 70, 71, 31))
@@ -442,11 +442,13 @@ class Ui_MainWindow(object):
         ####
 
 
-        self.comboBox = QtWidgets.QComboBox(self.groupBox_2)
-        self.comboBox.setGeometry(QtCore.QRect(10, 30, 101, 21))
-        self.comboBox.setObjectName("comboBox")
+        self.comboBox_subtitles = QtWidgets.QComboBox(self.groupBox_2)
+        self.comboBox_subtitles.setGeometry(QtCore.QRect(10, 30, 141, 21))
+        self.comboBox_subtitles.setObjectName("comboBox_subtitles")
+        self.comboBox_subtitles.setStyleSheet("color: black;\n"
+"")
         self.groupBox_3 = QtWidgets.QGroupBox(self.groupBox)
-        self.groupBox_3.setGeometry(QtCore.QRect(10, 380, 121, 111))
+        self.groupBox_3.setGeometry(QtCore.QRect(10, 380, 155, 111))
         self.groupBox_3.setObjectName("groupBox_3")
         self.bth_audio_submit = QtWidgets.QPushButton(self.groupBox_3)
         self.bth_audio_submit.setGeometry(QtCore.QRect(10, 70, 71, 31))
@@ -464,9 +466,11 @@ class Ui_MainWindow(object):
 "}\n"
 "")
         self.bth_audio_submit.setObjectName("bth_audio_submit")
-        self.comboBox_2 = QtWidgets.QComboBox(self.groupBox_3)
-        self.comboBox_2.setGeometry(QtCore.QRect(10, 30, 101, 21))
-        self.comboBox_2.setObjectName("comboBox_2")
+        self.comboBox_audio = QtWidgets.QComboBox(self.groupBox_3)
+        self.comboBox_audio.setGeometry(QtCore.QRect(10, 30, 141, 21))
+        self.comboBox_audio.setObjectName("comboBox_audio")
+        self.comboBox_audio.setStyleSheet("color: black;\n"
+"")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -490,6 +494,8 @@ class Ui_MainWindow(object):
         self.btn_select_series_category.clicked.connect(self.load_series)
         self.btn_stream.clicked.connect(self.stream)
         
+        self.player.set_title(555)
+        
 
 
         ## Video controll
@@ -498,20 +504,111 @@ class Ui_MainWindow(object):
         self.btn_resize.clicked.connect(self.full_screen_flipflop)
         self.btn_close.clicked.connect(self.kill_stream)
         self.volume_control.valueChanged[int].connect(self.change_volume)
+        self.time_Slider.valueChanged[int].connect(self.change_time)
+        self.bth_audio_submit.clicked.connect(self.set_audio_track)
+        self.bth_subtitle_submit.clicked.connect(self.set_subtitle)
 
-        ## get avilavble subtitles 
-        self.subtitles = self.get_subtitles()
-        ## get avilable audio tracks 
-        self.audio_tracks = self.get_audio_tracks()
+    def change_time(self, value):
+        print(f"Value ={value}")
+        if self.cached_type == "movie" or self.cached_type == "series":
+            tot_length = self.player.get_length()
+        else:
+            return
+        netto = int( (value * tot_length) / 100 )
+        if netto < self.player.get_time():
+            self.time_Slider.setValue(value)
+            return
+
+        self.player.set_time(netto)
+        
+
+
+    def load_audio_tracks(self):
+        if self.audio_tracks == 0:
+            print("Empty audio list")
+            return
+        current_audio = self.player.audio_get_track()
+        current_audio_index = 0
+        # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        for i in self.audio_tracks:
+            # index of the track 
+            print(f"going to add audio {i[1].decode()}")
+            self.comboBox_audio.addItem(i[1].decode())
+
+            # set the current audio track 
+            if i[0] == current_audio:
+                current_audio = self.comboBox_audio.currentIndex()
+        
+        self.comboBox_audio.setCurrentIndex(current_audio_index)
+        
+        # set the current audio track
+        
+        #self.comboBox_audio.setCurrentText(current_audio[1].decode())
+            
+
+    def set_audio_track(self):
+        # get selected item
+        selected = self.comboBox_audio.currentText().encode()
+        # get its index 
+        for i in self.audio_tracks:
+            if selected == i[1]:
+                self.player.audio_set_track(i[0])
+                print(f"Set audio track to {selected}")
+                return True 
+        print("Faild to set audio")
+        return False 
+    
+    def set_subtitle(self):
+        # get selected item
+        selected = self.comboBox_subtitles.currentText().encode()
+        # get its index 
+        for i in self.subtitles:
+            if selected == i[1]:
+                self.player.video_set_spu(i[0])
+                print(f"Set audio track to {selected}")
+                return True 
+        print("Faild to set audio")
+        return False 
+
+
+
+
+    def load_subtitles(self):
+        # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        if self.subtitles == 0:
+            print("Empty subtitle list")
+            return
+        current_subtitle = self.player.video_get_spu()
+        current_subtitle_index = 0
+        for i in self.subtitles:
+            # index of the track 
+            print(f"going to add sub {i[1].decode()}")
+            self.comboBox_subtitles.addItem(i[1].decode())
+
+            # set current subtitles 
+            if i[0] == current_subtitle:
+                current_subtitle_index = self.comboBox_subtitles.currentIndex()
+        
+        self.comboBox_subtitles.setCurrentIndex(current_subtitle_index)
+        
+        # set the current audio track
+        
+        
 
     def get_subtitles(self):
         avilable_subtitles = self.player.video_get_spu_description()
         # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
-        return avilable_subtitles
+        if len(avilable_subtitles) > 0:
+            return avilable_subtitles
+        else:
+            return False
 
     def get_audio_tracks(self):
         avilable_tracks = self.player.audio_get_track_description()
-        return avilable_tracks
+        if len(avilable_tracks) > 0:
+            return avilable_tracks
+        else:
+            return False
 
 
     def change_volume(self, value):
@@ -540,20 +637,33 @@ class Ui_MainWindow(object):
         selected = self.listWidget_2.currentItem().text()
         stream_url = self.get_url(selected)
         if stream_url != None:
-            self.stream_now(stream_url)
-            return
+            x = self.stream_now(stream_url)
+            if x != False:
+                ##### wait 5 second to handle received frames first.
+                time.sleep(4)
+                ## get avilavble subtitles 
+                self.subtitles = self.get_subtitles()
+                self.load_subtitles()
+                ## get avilable audio tracks 
+                self.audio_tracks = self.get_audio_tracks()
+                self.load_audio_tracks()
+                self.player.set_title(555)
+                #####
+                return
         ########################################### Show msg to say link can not found 
         print("Error, can not parse the selected item and no link found")
     
     def stream_now(self, url):
         self.player.set_media(vlc.Media(url))
         self.player.video_set_scale(0.5)
+        self.player.set_title(555)
         self.player.play()
         state = self.player.get_state()
         if state == vlc.State.Ended or state == vlc.State.Error:
             ###################################### Show msg to say channel has no signal now 
             print("No signal for this selected item")
             return False 
+
         return True
     
     def get_url(self, selected_item):
@@ -606,7 +716,7 @@ class Ui_MainWindow(object):
                 for series in i[1]:
                     self.listWidget_2.addItem(series.name)
 
-
+    
 
     
     def show_channels_category(self):
