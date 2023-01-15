@@ -16,9 +16,3 @@ Browse &amp; stream your IPTV channels, movies and series easily. Pick up any it
 
 #### An example where a movie is playing and the user choose a subtitle to.
 <img title="Computer vision for that image" alt="Alt text" src="./img/stream_1.jpg" style="width:90%; heigh:90%;">
-
-## Ex 
-<img title="Computer vision for that image" alt="Alt text" src="./img/stream3.jpg" >
-
-## Ex 
-<img title="Computer vision for that image" alt="Alt text" src="./img/stream2.jpg" >
