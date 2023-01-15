@@ -25,6 +25,9 @@ class Channel:
     
     def parse_link(self, line):
         line = line.split(" ")
+        x = -1
+        while len( line[x] ) < 40:
+            x -= 1
         info = line[-1].split("\r")
         length_list = []
         for i in info:
@@ -42,7 +45,12 @@ class Channel:
             index = link.index('\\')
             link = link[:index]
         except:
-            print("channel, except (2)")
+            pass
+        try:
+            index = link.index('\n')
+            link = link[:index]
+        except:
+            pass
         return link
 
     

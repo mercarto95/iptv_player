@@ -25,16 +25,31 @@ class Movie:
     
     def parse_link(self, line):
         line = line.split(" ")
+        x = -1
+        while len( line[x] ) < 40:
+            x -= 1
         info = line[-1].split("\r")
         now = False
         link = ""
-        index = info[0].index('http')
-        link = info[0][index:]
+        length = []
+        for i in info:
+            length.append( len(i) )
+        index = length.index( max(length) )
+        try:
+            index_http = info[index].index('http')
+            link = info[index][index_http:]
+        except:
+            link = ""
         try:
             index = link.index('\\')
             link = link[:index]
         except:
-            print("channel, except (2)")
+            pass
+        try:
+            index = link.index('\n')
+            link = link[:index]
+        except:
+            pass
 
         return link
 

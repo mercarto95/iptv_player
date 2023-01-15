@@ -8,13 +8,16 @@ import modirator
 from PyQt5.QtWidgets import QMessageBox
 import _parser_
 import Tv
+import main_menu, sys
 
 
 
 is_loading_now = False
 comBox_is_readed = False
+login_successed = False
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
+    def setupUi(self, MainWindow, app):
+        self.app = app
         self.main_window = MainWindow.setObjectName("MainWindow")
         MainWindow.resize(792, 780)
         MainWindow.setMinimumSize(QtCore.QSize(792, 597))
@@ -22,6 +25,9 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(1)
         MainWindow.setFont(font)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("./img/logo.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("border:0px;")
         MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
@@ -372,27 +378,52 @@ class Ui_MainWindow(object):
             return
         
         account =  Account(name, username, password, server_link)
-        if account == False:
+        if account == None:
             print("Can not create account instance. ")
-            ##                                              ## display msg box error 
+            self.show_msg("Error, can not create this account")
+            ##   
+        import request_service
+        request_service.request_data(account)                                           ## display msg box error 
         #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
         self.frame_2.hide()
         pass
 
 
     def submit_existing_account_clicked(self):
+        global login_successed
         print("submit existing account ")
         tv_name = self.comboBox_existing_account.currentText()
         x = self.account.confirm_existing_account(tv_name)
         if x == False:
             self.show_msg("Can not confirm the choosen tv")
-            return
+            return False
         #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
         path = "../data/"   ######################################################## Make it dynamic
         tv_name = path +  tv_name + ".bi"
-        
         self.tv = Tv.Tv(tv_name)
+        if self.tv.is_loaded == False:
+            self.frame_2.hide()
+            self.show_msg("Error, Can not find the cached file, try to update tv / request new")
+            self.btn_enter_existing.setEnabled(True)
+            self.btn_submit_exist.setEnabled(True)
+            self.btn_existing_account.setEnabled(True)
+            self.btn_new_account.setEnabled(True)
+            return
         self.frame_2.hide()
+        login_successed = True
+        print(f"login  =  {login_successed}")
+        self.app.exit()
+        print("Will this be exexuted???")
+        
+        ##########################################################################################################
+
+        # open the tv controll frame 
+
+        #main_menu.lunch_main_menu()
+
+        ## Exit the existing frame 
+        #sys.exit(app.exec_())
+        return True
         pass
 
 
@@ -422,7 +453,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Login to Rodri IPTV"))
+        #MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label_2.setText(_translate("MainWindow", "Free IPTV"))
         self.btn_new_account.setText(_translate("MainWindow", "New Account"))
         self.btn_existing_account.setText(_translate("MainWindow", "Exising Accunt"))
@@ -442,11 +474,30 @@ class Ui_MainWindow(object):
         self.btn_enter_existing.setText(_translate("MainWindow", "Enter"))
 
 
+"""
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
+    ui.setupUi(MainWindow, app)
     MainWindow.show()
     sys.exit(app.exec_())
+
+print("I defenetly good")
+"""
+
+
+
+
+
+def lunch_login_menu():
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow, app)
+    MainWindow.show()
+    app.exec_()
+    print(f"Login = {login_successed}")
+    return login_successed

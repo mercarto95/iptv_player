@@ -1,5 +1,7 @@
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
+
 import _parser_
 import vlc
 import os 
@@ -7,11 +9,15 @@ import os
 channel_categories_listed = False 
 series_categories_listed = False 
 movies_categories_listed = False 
+MAX_VOLUME = 250
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         self.player = vlc.MediaPlayer()
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(890, 691)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("./img/logo.jpg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         MainWindow.setMinimumSize(QtCore.QSize(890, 691))
         MainWindow.setMaximumSize(QtCore.QSize(890, 691))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -210,7 +216,7 @@ class Ui_MainWindow(object):
 "")
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_2.setObjectName("frame_2")
+        self.frame_2.setObjectName("frame_2l")
         self.label_2 = QtWidgets.QLabel(self.frame_2)
         self.label_2.setGeometry(QtCore.QRect(10, 10, 121, 41))
         font = QtGui.QFont()
@@ -255,6 +261,11 @@ class Ui_MainWindow(object):
         self.time_Slider = QtWidgets.QSlider(self.groupBox_4)
         self.time_Slider.setGeometry(QtCore.QRect(10, 20, 850, 5))
         self.time_Slider.setOrientation(QtCore.Qt.Horizontal)
+
+        self.time_Slider.setStyleSheet("background-color: rgb(244, 100, 71);\n"
+"color: rgb(232, 255, 78);")
+        self.time_Slider.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
         self.time_Slider.setObjectName("time_Slider")
         self.label_4 = QtWidgets.QLabel(self.frame)
         self.label_4.setGeometry(QtCore.QRect(370, 670, 221, 20))
@@ -471,6 +482,54 @@ class Ui_MainWindow(object):
         self.comboBox_audio.setObjectName("comboBox_audio")
         self.comboBox_audio.setStyleSheet("color: black;\n"
 "")
+
+
+        self.btn_reload_subtitles = QtWidgets.QPushButton(self.groupBox_2)
+        self.btn_reload_subtitles.setGeometry(QtCore.QRect(90, 70, 31, 31))
+        self.btn_reload_subtitles.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.btn_reload_subtitles.setAutoFillBackground(False)
+        self.btn_reload_subtitles.setStyleSheet("QPushButton{\n"
+"    color: black;\n"
+"    background-color: rgb(244, 100, 71);\n"
+"    border-radius:10px;\n"
+"}\n"
+"\n"
+"QPushButton:hover{\n"
+"    background-color: rgb(253, 255, 88);\n"
+"    color: rgb(0, 0, 255);\n"
+"}\n"
+"")
+        self.btn_reload_subtitles.setText("")
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("../iptv_player/img/reload.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_reload_subtitles.setIcon(icon4)
+        self.btn_reload_subtitles.setIconSize(QtCore.QSize(27, 27))
+        self.btn_reload_subtitles.setFlat(True)
+        self.btn_reload_subtitles.setObjectName("btn_reload_subtitles")
+
+
+        self.btn_reload_audios = QtWidgets.QPushButton(self.groupBox_3)
+        self.btn_reload_audios.setGeometry(QtCore.QRect(90, 70, 31, 31))
+        self.btn_reload_audios.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.btn_reload_audios.setAutoFillBackground(False)
+        self.btn_reload_audios.setStyleSheet("QPushButton{\n"
+"    color: black;\n"
+"    background-color: rgb(244, 100, 71);\n"
+"    border-radius:10px;\n"
+"}\n"
+"\n"
+"QPushButton:hover{\n"
+"    background-color: rgb(253, 255, 88);\n"
+"    color: rgb(0, 0, 255);\n"
+"}\n"
+"")
+        self.btn_reload_audios.setText("")
+        self.btn_reload_audios.setIcon(icon4)
+        self.btn_reload_audios.setIconSize(QtCore.QSize(27, 27))
+        self.btn_reload_audios.setFlat(True)
+        self.btn_reload_audios.setObjectName("btn_reload_audios")
+
+
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -479,11 +538,14 @@ class Ui_MainWindow(object):
         self.btn_channels.clicked.connect(self.show_channels_category)
         self.btn_series.clicked.connect(self.show_series_category)
         self.btn_movies.clicked.connect(self.show_movies_category)
-        x = _parser_.read_tvFile_contents("../data/test.bi")
-        _parser_.parse_file_contents(x)
+        #x = _parser_.read_tvFile_contents("../data/test.bi")
+        #_parser_.parse_file_contents(x)
         self.channels_categories = _parser_.get_channels()
+        self.channels_categories.sort()
         self.movies_categories = _parser_.get_movies()
+        self.movies_categories.sort()
         self.series_categories = _parser_.get_series()
+        self.series_categories.sort()
         self.show_series_category()
         self.show_movies_category()
         self.show_channels_category()
@@ -507,6 +569,29 @@ class Ui_MainWindow(object):
         self.time_Slider.valueChanged[int].connect(self.change_time)
         self.bth_audio_submit.clicked.connect(self.set_audio_track)
         self.bth_subtitle_submit.clicked.connect(self.set_subtitle)
+        self.btn_reload_audios.clicked.connect(self.reload_audio_tracks)
+        self.btn_reload_subtitles.clicked.connect(self.reload_subtitles)
+    
+    def reload_audio_tracks(self):
+        self.audio_tracks = self.get_audio_tracks()
+        if self.audio_tracks == False:
+            self.show_msg("No audio avilable for this video")
+            return
+        self.load_audio_tracks()
+
+    def show_msg(self, msg):
+        box = QMessageBox()
+        box.setWhatsThis("OBS")
+        msg += '\t'*4
+        box.setText(msg)
+        box.setIcon(QMessageBox.Information)
+        x = box.exec_()
+
+    def reload_subtitles(self):
+        self.subtitles = self.get_subtitles()
+        if self.subtitles == False:
+            self.show_msg("No subtitles avilable for this video")
+        self.load_subtitles()
 
     def change_time(self, value):
         print(f"Value ={value}")
@@ -524,9 +609,11 @@ class Ui_MainWindow(object):
 
 
     def load_audio_tracks(self):
+        self.comboBox_audio.clear()
         if self.audio_tracks == 0:
             print("Empty audio list")
             return
+        
         current_audio = self.player.audio_get_track()
         current_audio_index = 0
         # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
@@ -550,6 +637,10 @@ class Ui_MainWindow(object):
         # get selected item
         selected = self.comboBox_audio.currentText().encode()
         # get its index 
+        if self.audio_tracks == False:
+            self.audio_tracks = self.get_audio_tracks()
+            if self.audio_tracks == False:
+                return
         for i in self.audio_tracks:
             if selected == i[1]:
                 self.player.audio_set_track(i[0])
@@ -562,6 +653,10 @@ class Ui_MainWindow(object):
         # get selected item
         selected = self.comboBox_subtitles.currentText().encode()
         # get its index 
+        if self.subtitles == False:
+            self.subtitles = self.get_subtitles()
+            if self.subtitles == False:
+                return
         for i in self.subtitles:
             if selected == i[1]:
                 self.player.video_set_spu(i[0])
@@ -575,6 +670,7 @@ class Ui_MainWindow(object):
 
     def load_subtitles(self):
         # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        self.comboBox_subtitles.clear()
         if self.subtitles == 0:
             print("Empty subtitle list")
             return
@@ -612,18 +708,24 @@ class Ui_MainWindow(object):
 
 
     def change_volume(self, value):
-        print(f"Value is {value}")
-        self.player.audio_set_volume(value)
+        netto = int( (value * MAX_VOLUME) / 100 )
+        print(f"Value is {netto}")
+        self.player.audio_set_volume(netto)
+    
+    def put_start_volume(self):
+        current_volume = self.player.audio_get_volume()
+        #netto * 100 / max
+        value = int( (current_volume * 100) / MAX_VOLUME )
+        self.volume_control.setValue(value)
         
     def kill_stream(self):
         self.player.stop()
-    
     def full_screen_flipflop(self):
         if self.player.get_fullscreen():
-            self.player.video_set_scale(0.5)
+            #self.player.video_set_scale(0.7)
             self.player.set_fullscreen(False)
             return 
-        self.player.video_set_scale(1)
+        #self.player.video_set_scale(0.9)
         self.player.set_fullscreen(True)
 
     def stop_playing(self):
@@ -648,6 +750,7 @@ class Ui_MainWindow(object):
                 self.audio_tracks = self.get_audio_tracks()
                 self.load_audio_tracks()
                 self.player.set_title(555)
+                self.put_start_volume()
                 #####
                 return
         ########################################### Show msg to say link can not found 
@@ -655,7 +758,7 @@ class Ui_MainWindow(object):
     
     def stream_now(self, url):
         self.player.set_media(vlc.Media(url))
-        self.player.video_set_scale(0.5)
+        self.player.video_set_scale(0.95)
         self.player.set_title(555)
         self.player.play()
         state = self.player.get_state()
@@ -732,7 +835,10 @@ class Ui_MainWindow(object):
 
     def show_series_category(self):
         global series_categories_listed
-        self.stackedWidget.setCurrentIndex(2)
+        try:
+            self.stackedWidget.setCurrentIndex(2)
+        except:
+            pass
         if series_categories_listed: # then we have already listed categories
              return
         for i in self.series_categories:
@@ -750,17 +856,18 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(_translate("MainWindow", "Categories"))
+        #MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Rodri IPTV"))
+        self.label.setText(_translate("MainWindow", "  Channels"))
         self.btn_select_channel_category.setText(_translate("MainWindow", "Select"))
-        self.label_6.setText(_translate("MainWindow", "Categories"))
+        self.label_6.setText(_translate("MainWindow", "  Movies"))
         self.btn_select_movies_category.setText(_translate("MainWindow", "Select"))
-        self.label_7.setText(_translate("MainWindow", "Categories"))
+        self.label_7.setText(_translate("MainWindow", "  Series"))
         self.btn_select_series_category.setText(_translate("MainWindow", "Select"))
         self.btn_channels.setText(_translate("MainWindow", "Channels"))
         self.btn_movies.setText(_translate("MainWindow", "Movies"))
         self.btn_series.setText(_translate("MainWindow", "Series"))
-        self.label_2.setText(_translate("MainWindow", "Items"))
+        self.label_2.setText(_translate("MainWindow", "  Items"))
         self.btn_stream.setText(_translate("MainWindow", "Stream"))
         self.groupBox_4.setTitle(_translate("MainWindow", "Time"))
         self.label_4.setText(_translate("MainWindow", "©® Rodriguez"))
@@ -774,10 +881,16 @@ class Ui_MainWindow(object):
 
 
 if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+    import login_menu
+    x = login_menu.lunch_login_menu()
+    print(f"XXXX is {x}")
+    if x:
+        import sys
+        app = QtWidgets.QApplication(sys.argv)
+        MainWindow = QtWidgets.QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(MainWindow)
+        MainWindow.show()
+        sys.exit(app.exec_())
+
+

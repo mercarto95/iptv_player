@@ -7,15 +7,18 @@ tv_name = ""
 def read_tvFile_contents(file):
     global tv_name
     tv_name = file
-    f = open(file, "rb")
+    try:
+        f = open(file, "rb")
 
-    file = f.read()
-    if len(file) == 0:
-        print("File is empty")
-        os._exit(100)
-    f.close()
+        file = f.read()
+        if len(file) == 0:
+            print("File is empty")
+            os._exit(100)
+        f.close()
+        return file
+    except:
+        return False
 
-    return file
 
 memory = []
 lines = []
@@ -109,8 +112,29 @@ def push_to_channel(country, info):
     channels_list.append(tmp)
     return True
 
+def push_series_2(info):
+    global series_list
+    start = info.index("group-title=")
+    info2 = info[start :]
+    end = info2.index(",")
+    try:
+        dirty_country = info2[ : end]
+        dirty_country = dirty_country.split('"')
+        country = dirty_country[1]
+    except:
+        pass
+    for index in series_list:
+        if index[0] == country:
+            index[1].append(info)
+            return True 
+    tmp = [country, [info]]
+    series_list.append(tmp)
+    return True
+
 def push_to_series(country, info):
     global series_list
+    push_series_2(info)
+    return
     for index in series_list:
         if index[0] == country:
             index[1].append(info)
@@ -120,8 +144,28 @@ def push_to_series(country, info):
     series_list.append(tmp)
     return True
 
+def push_to_movies_2(info):
+    start = info.index("group-title=")
+    info2 = info[start : ]
+    end = info2.index(",")
+    dirty_country = info2[ : end]
+    dirty_country = dirty_country.split('"')
+    try:
+        country = dirty_country[1]
+    except:
+        pass
+    for index in movies_list:
+        if index[0] == country:
+            index[1].append(info)
+            return True 
+    tmp = [country, [info]]
+    movies_list.append(tmp)
+    return True
+
 def push_to_movie(country, info):
     global movies_list
+    push_to_movies_2(info)
+    return
     for index in movies_list:
         if index[0] == country:
             index[1].append(info)
@@ -183,7 +227,7 @@ def get_series():
 def get_channels():
     global channels_cache_list
     if len( channels_cache_list ) > 0:
-        return series_cache_list
+        return channels_cache_list
     channels_cache_list = get_objects(channels_list, 'channels')
     return channels_cache_list
 

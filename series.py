@@ -25,20 +25,31 @@ class Series:
     
     def parse_link(self, line):
         line = line.split(" ")
-        info = line[-1].split("\r")
+        x = -1
+        while len( line[x] ) < 40:
+            x -= 1
+        info = line[x].split("\r")
         now = False
         length = []
         for i in info:
             length.append(len(i))
         dirty_link = info[ length.index(max(length)) ]
         link = ""
-        index = dirty_link.index('http')
-        link = dirty_link[index:]
+        try:
+            index = dirty_link.index('http')
+            link = dirty_link[index:]
+        except:
+            pass
         try:
             index = link.index('\\')
             link = link[:index]
         except:
-            print("channel, except (2)")
+            pass
+        try:
+            index = link.index('\n')
+            link = link[:index]
+        except:
+            pass
         return link
 
 'series = Series(x)'
