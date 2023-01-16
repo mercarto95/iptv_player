@@ -29,10 +29,7 @@ recognized_group_title = False
 def parse_file_contents(file_content):
     global memory, lines, countries, tot, recognized_group_title
     # each line beginning with "#EXTINF:-1 "
-    try:
-        text = file_content.decode()
-    except:
-        text = file_content
+    text = file_content.decode()
     lines = text.split("#EXTINF:-1 ")
     item = lines[2]
     s = item.split('"')

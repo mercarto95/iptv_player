@@ -9,16 +9,11 @@ def request_data(account):
 
     server_url = server_url + "/get.php?username=" + username + "&password=" + password + "&type=m3u_plus&output=ts"
     # Connect to the server and retrieve the list of channels
-    try:
-        response = requests.get(f"{server_url}", auth=(username, password))
-    except:
-        print("Error in url. Check login information")
-        return False
-        #channels = response.json()
-    
-    # Store info to HD
+    response = requests.get(f"{server_url}", auth=(username, password))
+    #channels = response.json()
+    c = 0
     file_name = account.name + ".bi"
-    x = open("./data/" + file_name , "wb")
+    x = open("../data/" + file_name , "wb")
     """
     for i in response.text:
         try:
@@ -32,8 +27,6 @@ def request_data(account):
         x.write(response._content)
     except:
         print("Error while saving the file to the disk __request service.py")
-        x.close()
-        return None
+    x.close()
 
-    return response._content
-    
+    return True

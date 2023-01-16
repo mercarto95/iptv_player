@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QMessageBox
 import _parser_
 import vlc
 import os 
-import main_menu_modirator
 
 channel_categories_listed = False 
 series_categories_listed = False 
@@ -500,7 +499,7 @@ class Ui_MainWindow(object):
 "")
         self.btn_reload_subtitles.setText("")
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("./img/reload.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap("../iptv_player/img/reload.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_reload_subtitles.setIcon(icon4)
         self.btn_reload_subtitles.setIconSize(QtCore.QSize(27, 27))
         self.btn_reload_subtitles.setFlat(True)
@@ -570,90 +569,288 @@ class Ui_MainWindow(object):
         self.bth_subtitle_submit.clicked.connect(self.set_subtitle)
         self.btn_reload_audios.clicked.connect(self.reload_audio_tracks)
         self.btn_reload_subtitles.clicked.connect(self.reload_subtitles)
-
-
-        ##### Needed Arguments #####
-        self.audio_tracks = None
-        self.subtitles = None 
-        self.cached_type = None 
-        self.cached_category = None
-
-
     
     def reload_audio_tracks(self):
-        return main_menu_modirator.reload_audio_tracks(self)
+        self.audio_tracks = self.get_audio_tracks()
+        if self.audio_tracks == False:
+            self.show_msg("No audio avilable for this video")
+            return
+        self.load_audio_tracks()
 
     def show_msg(self, msg):
-        return main_menu_modirator.show_msg(self, msg)
+        box = QMessageBox()
+        box.setWhatsThis("OBS")
+        msg += '\t'*4
+        box.setText(msg)
+        box.setIcon(QMessageBox.Information)
+        x = box.exec_()
 
     def reload_subtitles(self):
-        return main_menu_modirator.reload_subtitles(self)
+        self.subtitles = self.get_subtitles()
+        if self.subtitles == False:
+            self.show_msg("No subtitles avilable for this video")
+        self.load_subtitles()
 
     def change_time(self, value):
-        return main_menu_modirator.change_time(self, value)
+        print(f"Value ={value}")
+        if self.cached_type == "movie" or self.cached_type == "series":
+            tot_length = self.player.get_length()
+        else:
+            return
+        netto = int( (value * tot_length) / 100 )
+        if netto < self.player.get_time():
+            self.time_Slider.setValue(value)
+            return
+
+        self.player.set_time(netto)
         
+
+
     def load_audio_tracks(self):
-        return main_menu_modirator.load_audio_tracks(self)
-    
+        self.comboBox_audio.clear()
+        if self.audio_tracks == 0:
+            print("Empty audio list")
+            return
+        
+        current_audio = self.player.audio_get_track()
+        current_audio_index = 0
+        # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        for i in self.audio_tracks:
+            # index of the track 
+            print(f"going to add audio {i[1].decode()}")
+            self.comboBox_audio.addItem(i[1].decode())
+
+            # set the current audio track 
+            if i[0] == current_audio:
+                current_audio = self.comboBox_audio.currentIndex()
+        
+        self.comboBox_audio.setCurrentIndex(current_audio_index)
+        
+        # set the current audio track
+        
+        #self.comboBox_audio.setCurrentText(current_audio[1].decode())
+            
+
     def set_audio_track(self):
-        return main_menu_modirator.set_audio_track(self) 
+        # get selected item
+        selected = self.comboBox_audio.currentText().encode()
+        # get its index 
+        if self.audio_tracks == False:
+            self.audio_tracks = self.get_audio_tracks()
+            if self.audio_tracks == False:
+                return
+        for i in self.audio_tracks:
+            if selected == i[1]:
+                self.player.audio_set_track(i[0])
+                print(f"Set audio track to {selected}")
+                return True 
+        print("Faild to set audio")
+        return False 
     
     def set_subtitle(self):
-        return main_menu_modirator.set_subtitle(self) 
+        # get selected item
+        selected = self.comboBox_subtitles.currentText().encode()
+        # get its index 
+        if self.subtitles == False:
+            self.subtitles = self.get_subtitles()
+            if self.subtitles == False:
+                return
+        for i in self.subtitles:
+            if selected == i[1]:
+                self.player.video_set_spu(i[0])
+                print(f"Set audio track to {selected}")
+                return True 
+        print("Faild to set audio")
+        return False 
+
+
+
 
     def load_subtitles(self):
-        return main_menu_modirator.load_subtitles(self)
+        # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        self.comboBox_subtitles.clear()
+        if self.subtitles == 0:
+            print("Empty subtitle list")
+            return
+        current_subtitle = self.player.video_get_spu()
+        current_subtitle_index = 0
+        for i in self.subtitles:
+            # index of the track 
+            print(f"going to add sub {i[1].decode()}")
+            self.comboBox_subtitles.addItem(i[1].decode())
+
+            # set current subtitles 
+            if i[0] == current_subtitle:
+                current_subtitle_index = self.comboBox_subtitles.currentIndex()
         
-    def get_subtitles(self):    
-        return main_menu_modirator.get_subtitles(self)
+        self.comboBox_subtitles.setCurrentIndex(current_subtitle_index)
+        
+        # set the current audio track
+        
+        
+
+    def get_subtitles(self):
+        avilable_subtitles = self.player.video_get_spu_description()
+        # [(-1, b'Disable'), (257, b'Track 1 - [French]')]
+        if len(avilable_subtitles) > 0:
+            return avilable_subtitles
+        else:
+            return False
 
     def get_audio_tracks(self):
-        return main_menu_modirator.get_audio_tracks(self)
+        avilable_tracks = self.player.audio_get_track_description()
+        if len(avilable_tracks) > 0:
+            return avilable_tracks
+        else:
+            return False
+
 
     def change_volume(self, value):
-        return main_menu_modirator.change_volume(self, value)
+        netto = int( (value * MAX_VOLUME) / 100 )
+        print(f"Value is {netto}")
+        self.player.audio_set_volume(netto)
     
     def put_start_volume(self):
-        return main_menu_modirator.put_start_volume(self)
+        current_volume = self.player.audio_get_volume()
+        #netto * 100 / max
+        value = int( (current_volume * 100) / MAX_VOLUME )
+        self.volume_control.setValue(value)
         
     def kill_stream(self):
-        return main_menu_modirator.kill_stream(self)
-    
+        self.player.stop()
     def full_screen_flipflop(self):
-        return main_menu_modirator.full_screen_flipflop(self)
+        if self.player.get_fullscreen():
+            #self.player.video_set_scale(0.7)
+            self.player.set_fullscreen(False)
+            return 
+        #self.player.video_set_scale(0.9)
+        self.player.set_fullscreen(True)
 
     def stop_playing(self):
-        return main_menu_modirator.stop_playing(self)
+        self.player.pause()
 
     def resume(self):
-        return main_menu_modirator.resume(self)
+        self.player.play()
 
     def stream(self):
-        return main_menu_modirator.stream(self)
+        # need to get the url first.
+        selected = self.listWidget_2.currentItem().text()
+        stream_url = self.get_url(selected)
+        if stream_url != None:
+            x = self.stream_now(stream_url)
+            if x != False:
+                ##### wait 5 second to handle received frames first.
+                time.sleep(4)
+                ## get avilavble subtitles 
+                self.subtitles = self.get_subtitles()
+                self.load_subtitles()
+                ## get avilable audio tracks 
+                self.audio_tracks = self.get_audio_tracks()
+                self.load_audio_tracks()
+                self.player.set_title(555)
+                self.put_start_volume()
+                #####
+                return
+        ########################################### Show msg to say link can not found 
+        print("Error, can not parse the selected item and no link found")
     
     def stream_now(self, url):
-        return main_menu_modirator.stream_now(self, url)
+        self.player.set_media(vlc.Media(url))
+        self.player.video_set_scale(0.95)
+        self.player.set_title(555)
+        self.player.play()
+        state = self.player.get_state()
+        if state == vlc.State.Ended or state == vlc.State.Error:
+            ###################################### Show msg to say channel has no signal now 
+            print("No signal for this selected item")
+            return False 
+
+        return True
     
     def get_url(self, selected_item):
-        return main_menu_modirator.get_url(self, selected_item)
+        category = self.cached_category
+        myList = None
+        if self.cached_type == "movie":
+            myList = self.movies_categories
+        elif self.cached_type == "series":
+            myList = self.series_categories
+        elif self.cached_type == "channel":
+                myList = self.channels_categories
+        if category == None or myList == None:
+            return 
+        
+        for i in myList:
+            if i[0] == category:
+                for j in i[1]:
+                    if j.name == selected_item:
+                        print(f"Found, {j.name} , {j.link}")
+                        return j.link
+        return None
 
     def load_channels(self):
-        return main_menu_modirator.load_channels(self)
+        category = self.listWidget_channels.currentItem().text()
+        self.cached_category = category
+        self.cached_type = "channel"
+        self.listWidget_2.clear()
+        for i in self.channels_categories:
+            if i[0] == category:
+                for channel in i[1]:
+                    self.listWidget_2.addItem(channel.name)
 
     def load_movies(self):
-        return main_menu_modirator.load_movies(self)
+        category = self.listWidget_movies.currentItem().text()
+        self.cached_category = category
+        self.cached_type = "movie"
+        self.listWidget_2.clear()
+        for i in self.movies_categories:
+            if i[0] == category:
+                for movie in i[1]:
+                    self.listWidget_2.addItem(movie.name)
 
     def load_series(self):
-        return main_menu_modirator.load_series(self)
+        category = self.listWidget_series.currentItem().text()
+        self.cached_category = category
+        self.cached_type = "series"
+        self.listWidget_2.clear()
+        for i in self.series_categories:
+            if i[0] == category:
+                for series in i[1]:
+                    self.listWidget_2.addItem(series.name)
 
+    
+
+    
     def show_channels_category(self):
-        return main_menu_modirator.show_channels_category(self)
+        #self.listWidget.addItem("Hi")
+        global channel_categories_listed
+        self.stackedWidget.setCurrentIndex(0)
+        if channel_categories_listed : # then we have already listed categories
+            return
+        for i in self.channels_categories:
+            self.listWidget_channels.addItem(i[0])
+        
+        channel_categories_listed = True
 
     def show_series_category(self):
-        return main_menu_modirator.show_series_category(self)
+        global series_categories_listed
+        try:
+            self.stackedWidget.setCurrentIndex(2)
+        except:
+            pass
+        if series_categories_listed: # then we have already listed categories
+             return
+        for i in self.series_categories:
+            self.listWidget_series.addItem(i[0])
+        series_categories_listed = True
 
     def show_movies_category(self):
-        return main_menu_modirator.show_movies_category(self)
+        global movies_categories_listed
+        self.stackedWidget.setCurrentIndex(1)
+        if movies_categories_listed: # then we have already listed it
+             return
+        for i in self.movies_categories:
+            self.listWidget_movies.addItem(i[0])
+        movies_categories_listed = True
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

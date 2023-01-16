@@ -1,18 +1,23 @@
+
+
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from PyQt5.QtGui import QMovie
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QApplication, QVBoxLayout
 from Account import *
+import modirator
 from PyQt5.QtWidgets import QMessageBox
-import Tv, login_modirator
+import _parser_
+import Tv
+import main_menu, sys
 
 
 
 is_loading_now = False
 comBox_is_readed = False
+login_successed = False
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow, app):
         self.app = app
-        self.login_successed = False
         self.main_window = MainWindow.setObjectName("MainWindow")
         MainWindow.resize(792, 780)
         MainWindow.setMinimumSize(QtCore.QSize(792, 597))
@@ -333,24 +338,94 @@ class Ui_MainWindow(object):
         self.account = None
     
     def existing_account_clicked(self):
-        login_modirator.login_existing_account_clicked(self)
-        return
+        global comBox_is_readed
+        print("show existing accounts menu")
+        self.txtBox_username.setText("")
+        self.txtBox_name.setText("")
+        self.txtBox_password.setText("")
+        self.txtBox_server.setText("")
+        self.widget_1.setCurrentIndex(1)
+        if comBox_is_readed:
+            return
+        self.account = Account()  # account = list of lines, each line = "name, username, password, server"
+        lines = self.account.read_accounts_from_database()
+        if lines is not None and lines is not False and len(lines) > 0:
+            for line in lines:
+                x = line.split(", ")
+                self.comboBox_existing_account.addItem(x[0])
+        comBox_is_readed = True
 
-    
+        
+        pass
+        
+
     def new_account_menu_clicked(self):
-        login_modirator.login_new_account_menu_clicked(self)
-        return
-
-
+        print("show new accounts menu")
+        self.txtBox_username.setText("")
+        self.txtBox_name.setText("")
+        self.txtBox_password.setText("")
+        self.txtBox_server.setText("")
+        self.widget_1.setCurrentIndex(0)
 
     def submit_new_account_clicked(self):
-        login_modirator.login_submit_new_account_clicked(self)
-        return
+        print("submit new account")
+        name = self.txtBox_name.text()
+        username = self.txtBox_username.text()
+        password = self.txtBox_password.text()
+        server_link = self.txtBox_server.text()
+        if name == "" or username == "" or password == "":
+            self.show_msg("Fill all fields, please!")
+            return
+        
+        account =  Account(name, username, password, server_link)
+        if account == None:
+            print("Can not create account instance. ")
+            self.show_msg("Error, can not create this account")
+            ##   
+        import request_service
+        request_service.request_data(account)                                           ## display msg box error 
+        #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
+        self.frame_2.hide()
+        pass
 
 
     def submit_existing_account_clicked(self):
-        login_modirator.login_submit_existing_account_clicked(self)
-        return
+        global login_successed
+        print("submit existing account ")
+        tv_name = self.comboBox_existing_account.currentText()
+        x = self.account.confirm_existing_account(tv_name)
+        if x == False:
+            self.show_msg("Can not confirm the choosen tv")
+            return False
+        #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
+        path = "../data/"   ######################################################## Make it dynamic
+        tv_name = path +  tv_name + ".bi"
+        self.tv = Tv.Tv(tv_name)
+        if self.tv.is_loaded == False:
+            self.frame_2.hide()
+            self.show_msg("Error, Can not find the cached file, try to update tv / request new")
+            self.btn_enter_existing.setEnabled(True)
+            self.btn_submit_exist.setEnabled(True)
+            self.btn_existing_account.setEnabled(True)
+            self.btn_new_account.setEnabled(True)
+            return
+        self.frame_2.hide()
+        login_successed = True
+        print(f"login  =  {login_successed}")
+        self.app.exit()
+        print("Will this be exexuted???")
+        
+        ##########################################################################################################
+
+        # open the tv controll frame 
+
+        #main_menu.lunch_main_menu()
+
+        ## Exit the existing frame 
+        #sys.exit(app.exec_())
+        return True
+        pass
+
 
     def show_msg(self, msg):
         box = QMessageBox()
@@ -362,8 +437,16 @@ class Ui_MainWindow(object):
 
 
     def show_waiting_menu(self):
-        login_modirator.login_show_waiting_menu(self)
-        return
+        read_from_cache = self.radioButton_read_from_file.isChecked()
+        make_new_request = self.radioButton_update_file.isChecked()
+        if read_from_cache == make_new_request == False:
+            self.show_msg("Choose: read from cache OR update file, Please! ")
+            return
+        self.btn_new_account.setEnabled(False)
+        self.btn_existing_account.setEnabled(False)
+        self.btn_enter_existing.setEnabled(False)
+        print("Going to waiting_frame now now")
+        self.frame_2.show()
         
 
 
@@ -416,5 +499,5 @@ def lunch_login_menu():
     ui.setupUi(MainWindow, app)
     MainWindow.show()
     app.exec_()
-    print(f"Login = {ui.login_successed}")
-    return ui.login_successed
+    print(f"Login = {login_successed}")
+    return login_successed
