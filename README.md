@@ -7,6 +7,8 @@ Browse &amp; stream your IPTV channels, movies and series easily. Pick up any it
 
 The App gives you ability to store the channels list in your local machine, that gives the app ability to avoid going through the login-server each time you watch the tv. This make the app launchs and runs in a very fast way.
 
+Unlike other programs, the user can choose when to update the channels list and when not. This features has especially made for some users who need to launch the app in a fast way, without updating things and without going through the login-server.
+
 The app gives you ability to change the audio tracks or subtitles at any time in a fast way.
 
 #### Ex: img1
