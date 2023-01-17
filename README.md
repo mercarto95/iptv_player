@@ -5,7 +5,7 @@ And then run ```python3 main.py``` to launch the app
 # iptv_player
 Browse &amp; stream your IPTV channels, movies and series easily. Pick up any item and enjoy watching!
 
-The App gives you ability to store the channels list in your local machine, and that make the app avoid going through the login-server each time you watch the tv. This make the app launchs and runs in a very fast way.
+The App gives you ability to store the channels list in your local machine, that gives the app ability to avoid going through the login-server each time you watch the tv. This make the app launchs and runs in a very fast way.
 
 The app gives you ability to change the audio tracks or subtitles at any time in a fast way.
 
