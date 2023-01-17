@@ -1,0 +1,4 @@
+python-vlc
+PyQt5
+requests
+pyinstaller
