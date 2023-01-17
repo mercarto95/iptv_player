@@ -680,10 +680,12 @@ class Ui_MainWindow(object):
         self.groupBox_3.setTitle(_translate("MainWindow", "Audio"))
         self.bth_audio_submit.setText(_translate("MainWindow", "Submit"))
 
-
+"""
 if __name__ == "__main__":
     import login_menu
-    x = login_menu.lunch_login_menu()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(current_dir)
+    x = login_menu.launch_login_menu()
     print(f"XXXX is {x}")
     if x:
         import sys
@@ -693,5 +695,19 @@ if __name__ == "__main__":
         ui.setupUi(MainWindow)
         MainWindow.show()
         sys.exit(app.exec_())
+"""
 
-
+def launch_app():
+    import login_menu
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(current_dir)
+    x = login_menu.launch_login_menu()
+    print(f"XXXX is {x}")
+    if x:
+        import sys
+        app = QtWidgets.QApplication(sys.argv)
+        MainWindow = QtWidgets.QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(MainWindow)
+        MainWindow.show()
+        sys.exit(app.exec_())

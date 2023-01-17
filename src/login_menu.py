@@ -46,7 +46,7 @@ class Ui_MainWindow(object):
         self.logo = QtWidgets.QLabel(self.frame)
         self.logo.setGeometry(QtCore.QRect(550, 380, 231, 181))
         self.logo.setText("")
-        self.logo.setPixmap(QtGui.QPixmap("img/logo.jpg"))
+        self.logo.setPixmap(QtGui.QPixmap("./img/logo.jpg"))
         self.logo.setScaledContents(True)
         self.logo.setObjectName("logo")
         self.label_2 = QtWidgets.QLabel(self.frame)
@@ -408,7 +408,7 @@ print("I defenetly good")
 
 
 
-def lunch_login_menu():
+def launch_login_menu():
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
