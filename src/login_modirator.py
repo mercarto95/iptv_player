@@ -58,7 +58,6 @@ def login_submit_new_account_clicked(obj):
         ##   
     import request_service
     x = request_service.request_data(account)  
-    obj.tv = Tv.Tv( x, new_tv=True)
     obj.btn_enter_existing.setEnabled(True)
     obj.btn_submit_exist.setEnabled(True)
     obj.btn_existing_account.setEnabled(True)
@@ -69,6 +68,7 @@ def login_submit_new_account_clicked(obj):
         obj.show_msg("Faild to store data in cache. Try again or report us the problem ( inc. your login info ) to fix the bugg asap.")
     #### Need to read the channels file of the choosen tv . name of the file = (tv_name + extention)
     else:
+        obj.tv = Tv.Tv( x, new_tv=True)
         obj.btn_enter_existing.setEnabled(True)
         obj.btn_submit_exist.setEnabled(True)
         obj.btn_existing_account.setEnabled(True)
