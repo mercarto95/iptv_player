@@ -197,7 +197,7 @@ pass
 
 def get_objects(myList, type):
     if len(myList) == 0:
-        return None
+        return []
     objects = []
     for i in myList:
         tmp = [i[0], []]

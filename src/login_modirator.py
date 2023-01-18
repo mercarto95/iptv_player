@@ -2,6 +2,7 @@ import  src.Tv as Tv, src.Account as Account
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+import src.request_service as request_service
 
 
 comBox_is_readed = False 
@@ -51,7 +52,6 @@ def login_submit_new_account_clicked(obj):
         print("Can not create account instance. ")
         obj.show_msg("Error, can not create this account")
         ##   
-    import request_service
     x = request_service.request_data(account)  
     obj.btn_enter_existing.setEnabled(True)
     obj.btn_submit_exist.setEnabled(True)
