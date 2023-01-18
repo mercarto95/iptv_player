@@ -1,12 +1,7 @@
-import _parser_, os, login_menu, main_menu, Tv, Account
+import  src.Tv as Tv, src.Account as Account
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-
-import _parser_
-import vlc
-import os 
-import main_menu_modirator
 
 
 comBox_is_readed = False 

@@ -1,11 +1,13 @@
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+import sys, os
 
-import _parser_
+import src.login_menu as login_menu
+import src._parser_ as _parser_
 import vlc
 import os 
-import main_menu_modirator
+import src.main_menu_modirator as main_menu_modirator
 
 channel_categories_listed = False 
 series_categories_listed = False 
@@ -698,7 +700,6 @@ if __name__ == "__main__":
 """
 
 def launch_app():
-    import login_menu
     current_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(current_dir)
     x = login_menu.launch_login_menu()

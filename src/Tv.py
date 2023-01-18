@@ -1,4 +1,4 @@
-import _parser_
+import src._parser_ as _parser_
 
 class Tv:
     def __init__(self, tv_name, new_tv=False) -> None:

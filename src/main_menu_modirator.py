@@ -1,13 +1,10 @@
-import _parser_, os, vlc, time
+import vlc, time
 from PyQt5.QtWidgets import QMessageBox
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
-import _parser_
 import vlc
-import os 
-import main_menu_modirator
 
 
 channel_categories_listed = False 

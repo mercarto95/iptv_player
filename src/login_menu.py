@@ -1,9 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from PyQt5.QtGui import QMovie
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QApplication, QVBoxLayout
-from Account import *
+from src.Account import *
 from PyQt5.QtWidgets import QMessageBox
-import Tv, login_modirator
+import src.Tv as Tv, src.login_modirator as login_modirator
+
 
 
 

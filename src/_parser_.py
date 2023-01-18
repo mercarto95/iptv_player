@@ -1,7 +1,7 @@
 import os
-from channel import *
-from movie import*
-from series import *
+from src.channel import *
+from src.movie import*
+from src.series import *
 
 tv_name = ""
 def read_tvFile_contents(file):
