@@ -2,6 +2,7 @@
 
 sudo apt update
 sudo apt install python3-full python3-venv -y
+sudo apt install vlc
 
 python3 -m venv venv
 
@@ -32,6 +33,7 @@ sudo apt install -y \
     libegl1 \
     libdbus-1-3
 ```
+sudo apt update && sudo apt install vlc
 
 # iptv_player
 Browse &amp; stream your IPTV channels, movies and series easily. Pick up any item and enjoy watching!
@@ -67,5 +69,4 @@ The app gives you ability to change the audio tracks or subtitles at any time in
 
 #### An example where a movie is playing and the user choose a subtitle to.
 <img title="Computer vision for that image" alt="Alt text" src="./src/img/stream_1.jpg" style="width:90%; heigh:90%;">
-
 
