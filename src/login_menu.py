@@ -1,3 +1,4 @@
+#filename: src/login_menu.py
 from PyQt5 import QtCore, QtGui, QtWidgets 
 from PyQt5.QtGui import QMovie
 from PyQt5.QtWidgets import QWidget, QProgressBar, QPushButton, QApplication, QVBoxLayout

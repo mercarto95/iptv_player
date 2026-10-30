@@ -1,4 +1,4 @@
-
+#filename  : src/series.py
 class Series:
     def __init__(self, line):
         self.id = self.parse_id(line)

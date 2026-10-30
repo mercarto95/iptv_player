@@ -1,4 +1,4 @@
-
+# filename: src/channel.py
 class Channel:
     def __init__(self, line):
         self.channel_id = self.parse_id(line)
