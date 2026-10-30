@@ -1,6 +1,37 @@
 # Requirements
+
+sudo apt update
+sudo apt install python3-full python3-venv -y
+
+python3 -m venv venv
+
+source venv/bin/activate
+
+
 To install the requirement: ```pip install -r requirements.txt```
 And then run ```python3 main.py``` to launch the app
+
+# WSL installaion
+To show the gui:
+```
+sudo apt update
+
+sudo apt install -y \
+    libxcb-xinerama0 \
+    libxcb-cursor0 \
+    libxcb-xkb1 \
+    libxkbcommon-x11-0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb-randr0 \
+    libxcb-shape0 \
+    libxcb-xfixes0 \
+    libgl1 \
+    libegl1 \
+    libdbus-1-3
+```
 
 # iptv_player
 Browse &amp; stream your IPTV channels, movies and series easily. Pick up any item and enjoy watching!
